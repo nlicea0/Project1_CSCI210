@@ -1,31 +1,34 @@
 package com.example.gridlayout;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.gridlayout.widget.GridLayout;
-
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.*;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.gridlayout.widget.GridLayout;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.Vector;
 
 class CellInfo {
     boolean hasBomb = false;
     boolean hasFlag = false;
-    boolean isRevealed = false;
 }
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int COLUMN_COUNT = 10;
     private static final int ROW_COUNT = 12;
-    private int[] nearby_bombs = new int[120];
+    private final int[] nearby_bombs = new int[120];
     private int flags_needed = 4;
     private int clock = 0;
     private boolean running = true;
@@ -33,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean endGameBombs = false;
     private int numCellsRevealed = 0;
     private boolean lastClick = false;
-    private Set<Integer> bombs = new HashSet<Integer>();
+    private final Set<Integer> bombs = new HashSet<>();
 
     // save the TextViews of all cells in an array, so later on,
     // when a TextView is clicked, we know which cell it is
@@ -88,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    public void onSaveInstanceState(Bundle savedInstanceState) {
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putInt("clock", clock);
         savedInstanceState.putBoolean("running", running);
@@ -98,8 +101,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        cell_tvs = new ArrayList<>();
 
-        cell_tvs = new ArrayList<TextView>();
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setCustomView(R.layout.action_bar);
 
         // create timer
         if (savedInstanceState != null) {
@@ -161,27 +166,13 @@ public class MainActivity extends AppCompatActivity {
         TextView tv = (TextView) view;
         TextView button_tv = (TextView) findViewById(R.id.textViewButton);
         int n = findIndexOfCellTextView(tv);
-        int row = n / COLUMN_COUNT;
-        int column = n % COLUMN_COUNT;
 
         // win game move to result page
         if(endGame){
-            // reveal all bombs
-            for (Integer bomb : bombs){
-                TextView bomb_tv = cell_tvs.get(bomb);
-                bomb_tv.setText(R.string.mine);
-                bomb_tv.setTextColor(Color.BLACK);
-                bomb_tv.setBackgroundColor(Color.LTGRAY);
-            }
-
-            if (lastClick){
-                String message = "Used " + clock + " seconds.\n" + "You won.\nGood job!";
-                Intent intent = new Intent(this, ResultPage.class);
-                intent.putExtra("com.example.onClickTV.MESSAGE", message);
-                startActivity(intent);
-            }
-
-            lastClick = true;
+            String message = "Used " + clock + " seconds.\n" + "You won.\nGood job!";
+            Intent intent = new Intent(this, ResultPage.class);
+            intent.putExtra("com.example.onClickTV.MESSAGE", message);
+            startActivity(intent);
         }
         // lost game move to result page
         else if(endGameBombs){
@@ -216,6 +207,14 @@ public class MainActivity extends AppCompatActivity {
             if(numCellsRevealed == 116){
                 endGame = true;
                 running = false;
+
+                // reveal all bombs
+                for (Integer bomb : bombs){
+                    TextView bomb_tv = cell_tvs.get(bomb);
+                    bomb_tv.setText(R.string.mine);
+                    bomb_tv.setTextColor(Color.BLACK);
+                    bomb_tv.setBackgroundColor(Color.LTGRAY);
+                }
             }
             // reveal other 8 cells
             revealCell(tv);
@@ -264,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
         int[] rowOffsets = {-1, -1, -1, 0, 0, 1, 1, 1};
         int[] colOffsets = {-1, 0, 1, -1, 1, -1, 0, 1};
 
-        Vector<TextView> blank_cells = new Vector<TextView>();
+        Vector<TextView> blank_cells = new Vector<>();
 
         // reveal neighboring cells
         for (int j = 0; j < 8; j++) {
@@ -299,6 +298,14 @@ public class MainActivity extends AppCompatActivity {
                 if(numCellsRevealed == 116){
                     endGame = true;
                     running = false;
+
+                    // reveal all bombs
+                    for (Integer bomb : bombs){
+                        TextView bomb_tv = cell_tvs.get(bomb);
+                        bomb_tv.setText(R.string.mine);
+                        bomb_tv.setTextColor(Color.BLACK);
+                        bomb_tv.setBackgroundColor(Color.LTGRAY);
+                    }
                 }
             }
 
