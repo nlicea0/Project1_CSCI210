@@ -3,9 +3,11 @@ package com.example.gridlayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.gridlayout.widget.GridLayout;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -24,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int ROW_COUNT = 12;
     private int[] nearby_bombs = new int[120];
     int flags_needed = 4;
+    private int clock = 0;
+    private boolean running = true;
 
     // save the TextViews of all cells in an array, so later on,
     // when a TextView is clicked, we know which cell it is
@@ -62,12 +66,41 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void runTimer() {
+        final TextView timeView = (TextView) findViewById(R.id.textViewTimer);
+        final Handler handler = new Handler();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                timeView.setText(String.valueOf(clock));
+
+                if (running) {
+                    clock++;
+                }
+                handler.postDelayed(this, 1000);
+            }
+        });
+    }
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt("clock", clock);
+        savedInstanceState.putBoolean("running", running);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         cell_tvs = new ArrayList<TextView>();
+
+        // create timer
+        if (savedInstanceState != null) {
+            clock = savedInstanceState.getInt("clock");
+            running = savedInstanceState.getBoolean("running");
+        }
+        runTimer();
 
         // create bombs in graph
         Set<Integer> bombs = new HashSet<Integer>();
@@ -143,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
             revealCell(tv);
         }
         // flag cell
-        else if(!(((CellInfo) tv.getTag()).hasFlag) && button_tv.getTag() == "flag"){
+        else if(!(((CellInfo) tv.getTag()).hasFlag) && button_tv.getTag() == "flag" && tv.getCurrentTextColor() == Color.GREEN){
             tv.setText(R.string.flag);
 
             // update tag
