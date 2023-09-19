@@ -15,6 +15,7 @@ import androidx.gridlayout.widget.GridLayout;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
@@ -35,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean endGame = false;
     private boolean endGameBombs = false;
     private int numCellsRevealed = 0;
-    private boolean lastClick = false;
     private final Set<Integer> bombs = new HashSet<>();
 
     // save the TextViews of all cells in an array, so later on,
@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         cell_tvs = new ArrayList<>();
 
-        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
         // create timer
