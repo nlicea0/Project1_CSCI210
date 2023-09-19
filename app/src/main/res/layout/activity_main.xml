@@ -6,22 +6,89 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/gridLayout01">
+
+        <TextView
+            android:id="@+id/textViewFlagIcon"
+            android:layout_width="40dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:contentDescription="@string/flag"
+            android:text="@string/flag"
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/textViewFlagCount"
+            android:layout_width="40dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:contentDescription="@string/flag"
+            android:onClick="onClickTV"
+            android:text="4"
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/textViewClockIcon"
+            android:layout_width="40dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:contentDescription="@string/clock"
+            android:text="@string/clock"
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/textViewTimer"
+            android:layout_width="40dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:contentDescription="@string/flag"
+            android:text="1"
+            android:textSize="25sp" />
+    </LinearLayout>
+
     <androidx.gridlayout.widget.GridLayout
         android:id="@+id/gridLayout01"
-        android:layout_width="375dp"
-        android:layout_height="500dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
-        android:layout_gravity="center"
-        app:rowCount="12"
         app:columnCount="10"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        >
-    </androidx.gridlayout.widget.GridLayout>
+        app:rowCount="12"></androidx.gridlayout.widget.GridLayout>
+
+    <TextView
+        android:id="@+id/textViewButton"
+        android:layout_width="48dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/pick"
+        android:onClick="switchMode"
+        android:text="@string/pick"
+        android:textSize="50sp"
+        android:tag="pick"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gridLayout01" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
