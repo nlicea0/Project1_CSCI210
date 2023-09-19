@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,9 +26,14 @@ public class MainActivity extends AppCompatActivity {
     private static final int COLUMN_COUNT = 10;
     private static final int ROW_COUNT = 12;
     private int[] nearby_bombs = new int[120];
-    int flags_needed = 4;
+    private int flags_needed = 4;
     private int clock = 0;
     private boolean running = true;
+    private boolean endGame = false;
+    private boolean endGameBombs = false;
+    private int numCellsRevealed = 0;
+    private boolean lastClick = false;
+    private Set<Integer> bombs = new HashSet<Integer>();
 
     // save the TextViews of all cells in an array, so later on,
     // when a TextView is clicked, we know which cell it is
@@ -103,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
         runTimer();
 
         // create bombs in graph
-        Set<Integer> bombs = new HashSet<Integer>();
         Random rand = new Random();
         while(bombs.size() < 4){
             bombs.add(rand.nextInt(120));
@@ -159,19 +164,59 @@ public class MainActivity extends AppCompatActivity {
         int row = n / COLUMN_COUNT;
         int column = n % COLUMN_COUNT;
 
-        // mine cell
-        if ((button_tv.getTag()).equals("pick") && tv.getCurrentTextColor() == Color.GREEN && !(((CellInfo) tv.getTag()).hasFlag)) {
-            // set text
-            if (((CellInfo) tv.getTag()).hasBomb) {
-                tv.setText(R.string.mine);
-            } else if (nearby_bombs[n] != 0) {
-                tv.setText(String.valueOf(nearby_bombs[n]));
+        // win game move to result page
+        if(endGame){
+            // reveal all bombs
+            for (Integer bomb : bombs){
+                TextView bomb_tv = cell_tvs.get(bomb);
+                bomb_tv.setText(R.string.mine);
+                bomb_tv.setTextColor(Color.BLACK);
+                bomb_tv.setBackgroundColor(Color.LTGRAY);
             }
 
+            if (lastClick){
+                String message = "Used " + clock + " seconds.\n" + "You won.\nGood job!";
+                Intent intent = new Intent(this, ResultPage.class);
+                intent.putExtra("com.example.onClickTV.MESSAGE", message);
+                startActivity(intent);
+            }
+
+            lastClick = true;
+        }
+        // lost game move to result page
+        else if(endGameBombs){
+            String message = "Used " + clock + " seconds.\n" + "You lost.\nBetter luck next time.";
+            Intent intent = new Intent(this, ResultPage.class);
+            intent.putExtra("com.example.onClickTV.MESSAGE", message);
+            startActivity(intent);
+        }
+        // mine a bomb
+        else if((button_tv.getTag()).equals("pick") && tv.getCurrentTextColor() == Color.GREEN && !(((CellInfo) tv.getTag()).hasFlag) && ((CellInfo) tv.getTag()).hasBomb){
+            // reveal all bombs
+            for (Integer bomb : bombs){
+                TextView bomb_tv = cell_tvs.get(bomb);
+                bomb_tv.setText(R.string.mine);
+                bomb_tv.setTextColor(Color.BLACK);
+                bomb_tv.setBackgroundColor(Color.LTGRAY);
+            }
+            // end the game
+            endGameBombs = true;
+            running = false;
+        }
+        // mine a valid cell
+        else if ((button_tv.getTag()).equals("pick") && tv.getCurrentTextColor() == Color.GREEN && !(((CellInfo) tv.getTag()).hasFlag)) {
+            if(nearby_bombs[n] > 0){
+                // set text
+                tv.setText(String.valueOf(nearby_bombs[n]));
+            }
             // change color
             tv.setTextColor(Color.BLACK);
             tv.setBackgroundColor(Color.LTGRAY);
-
+            numCellsRevealed++;
+            if(numCellsRevealed == 116){
+                endGame = true;
+                running = false;
+            }
             // reveal other 8 cells
             revealCell(tv);
         }
@@ -230,7 +275,8 @@ public class MainActivity extends AppCompatActivity {
             // Check if the neighboring cell is within the grid boundaries and unrevealed
             if (newRow >= 0 && newRow < ROW_COUNT && newCol >= 0 && newCol < COLUMN_COUNT
                     && cell_tvs.get(neighborIndex).getCurrentTextColor() == Color.GREEN
-                    && !((CellInfo) cell_tvs.get(neighborIndex).getTag()).hasFlag) {
+                    && !((CellInfo) cell_tvs.get(neighborIndex).getTag()).hasFlag
+                    && !((CellInfo) cell_tvs.get(neighborIndex).getTag()).hasBomb) {
 
                 // new cell setup
                 TextView neighbor_tv = cell_tvs.get(neighborIndex);
@@ -249,6 +295,11 @@ public class MainActivity extends AppCompatActivity {
                 // change color to reveal
                 neighbor_tv.setTextColor(Color.BLACK);
                 neighbor_tv.setBackgroundColor(Color.LTGRAY);
+                numCellsRevealed++;
+                if(numCellsRevealed == 116){
+                    endGame = true;
+                    running = false;
+                }
             }
 
             // recursively reveal blank cells
